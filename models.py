@@ -3,7 +3,9 @@
 
 #imports
 import dataProcessing
-from sklearn import tree
+from sklearn import tree 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
 
 # TODO: need to add count to test data from the other kaggle dataset
 
@@ -22,12 +24,11 @@ class Models:
         
         # clean data for testing file
         self.dfTest = self.dataProcessor.importData(testData)
-        self.dataProcessorTrain.fileInfoForTree(self.dfTest)
-        self.dfTest = self.dataProcessorTrain.cleanData(self.dfTest, 1, False)
+        self.dfTest = self.dataProcessor.cleanData(self.dfTest, 1, False)
         
         
     def decisionTree(self):
-        # separate dataframe into target and features lists for training
+        # separate training dataframe into target and features lists for training
         targetTrain = self.dfTrain["count"]
         featuresTrain = self.dfTrain.drop("count", axis=1)
         
@@ -35,13 +36,54 @@ class Models:
         classifierTree = tree.DecisionTreeClassifier()
         classifierTree = classifierTree.fit(featuresTrain, targetTrain)
         
-        # separate dataframe into target and features lists for testing
-        targetTest = self.dfTest["count"]
-        featuresTest = self.dfTest.drop("count", axis=1)
+        # separate testing dataframe into target and features lists for testing
+        targetTest = self.dfTest["cnt"]
+        featuresTest = self.dfTest.drop("cnt", axis=1)
                 
         # plot and predict
         tree.plot_tree(classifierTree)
         prediction = classifierTree.predict(featuresTest)
+        
+    def randomForest(self):
+        # separate training dataframe into target and features lists for training
+        targetTrain = self.dfTrain["count"]
+        featuresTrain = self.dfTrain.drop("count", axis=1)
+        
+        # create and train random forest classifier
+        classifierRF = RandomForestClassifier(random_state=30)
+        classifierRF = classifierRF.fit(targetTrain, featuresTrain)
+        
+        # separate testing dataframe into target and features lists for testing
+        targetTest = self.dfTest["cnt"]
+        featuresTest = self.dfTest.drop("cnt", axis=1)
+        
+        # predict
+        prediction = classifierRF.predict(featuresTest)
+        
+    def naiveBayes(self):
+        # separate training dataframe into target and features lists for training
+        targetTrain = self.dfTrain["count"]
+        featuresTrain = self.dfTrain.drop("count", axis=1)
+        
+        # create and train naive bayes classifier
+        classifierNB = GaussianNB()
+        classifierNB = classifierNB.fit(targetTrain, featuresTrain)
+        
+        # separate testing dataframe into target and features lists for testing
+        targetTest = self.dfTest["cnt"]
+        featuresTest = self.dfTest.drop("cnt", axis=1)
+        
+        # predict
+        prediction = classifierNB.predict(featuresTest)
+        
+        return prediction
+    
+model = Models("train.csv","test.csv")    
+print("model", model.naiveBayes)
+        
+
+        
+        
         
         
         

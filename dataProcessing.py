@@ -8,7 +8,7 @@ import numpy as np
 # the data processing class will be an object we use to handle data in a main file
 class dataProcessing:
     def __init__(self):
-        self.treeDelimiters = {}
+        self.treeDelimiters = []
 
     # reads data from Kaggle and puts it into a dataframe using pandas
     def importData(self, fileInput):
@@ -27,7 +27,7 @@ class dataProcessing:
         tempDelimiter = {}
         tempDelimiter[0] = np.percentile(tempVals, 25)
         tempDelimiter[1] = np.percentile(tempVals, 50)
-        tempDelimiter[2] = np.åpercentile(tempVals, 75)
+        tempDelimiter[2] = np.percentile(tempVals, 75)
         atempDelimiter = {}
         atempDelimiter[0] = np.percentile(atempVals, 25)
         atempDelimiter[1] = np.percentile(atempVals, 50)
@@ -45,8 +45,12 @@ class dataProcessing:
         countDelimiter[1] = np.percentile(countVals, 50)
         countDelimiter[2] = np.percentile(countVals, 75)
         
-        delimiters = {tempDelimiter, atempDelimiter, humidityDelimiter, windspeedDelimiter, countDelimiter}
-        return delimiters 
+        print("here ", len(countDelimiter))
+        self.treeDelimiters.append(tempDelimiter)
+        self.treeDelimiters.append(atempDelimiter)
+        self.treeDelimiters.append(humidityDelimiter)
+        self.treeDelimiters.append(windspeedDelimiter)
+        self.treeDelimiters.append(countDelimiter)
         
     # cleans data by creating a list object where each day has characteristics associated with it
     # also takes input for how we clean data --> needs to be different if doing binary tree or something else
@@ -57,8 +61,9 @@ class dataProcessing:
         if(setting == 1): 
             
             # collect delimiters if training --> if testing then we want same ones from training file so we don't collect (should be done/trained already)
-            if(train):
-                self.treeDelimiters = self.fileInfoFOrTree(self, df)
+            # if(train):
+            #    print("here")
+            #    self.fileInfoForTree(df)
             
             # will throw error if we haven't trained --> always train model first
             tempDelimiter = self.treeDelimiters[0]
@@ -68,30 +73,30 @@ class dataProcessing:
             countDelimiter = self.treeDelimiters[4]             
 
             # with our delimiters collected in fileInfoForTree we can discretize the data
-            df.loc[df["temp"] <= tempDelimiter[0]] =  0
-            df.loc[df["temp"] > tempDelimiter[0] & df["temp"] <= tempDelimiter[1]] =  1
-            df.loc[df["temp"] > tempDelimiter[1] & df["temp"] <= tempDelimiter[2]] =  2
-            df.loc[df["temp"] > tempDelimiter[2]] =  3
+            df.loc[df["temp"] <= tempDelimiter[0], "temp"] =  0
+            df.loc[(df["temp"] > tempDelimiter[0]) & (df["temp"] <= tempDelimiter[1]), "temp"] =  1
+            df.loc[(df["temp"] > tempDelimiter[1]) & (df["temp"] <= tempDelimiter[2]), "temp"] =  2
+            df.loc[df["temp"] > tempDelimiter[2], "temp"] =  3
 
-            df.loc[df["atemp"] <= atempDelimiter[0]] =  0
-            df.loc[df["atemp"] > atempDelimiter[0] & df["atemp"] <= atempDelimiter[1]] =  1
-            df.loc[df["atemp"] > atempDelimiter[1] & df["atemp"] <= atempDelimiter[2]] =  2
-            df.loc[df["atemp"] > atempDelimiter[2]] =  3
+            df.loc[df["atemp"] <= atempDelimiter[0], "atemp"] =  0
+            df.loc[(df["atemp"] > atempDelimiter[0]) & (df["atemp"] <= atempDelimiter[1]), "atemp"] =  1
+            df.loc[(df["atemp"] > atempDelimiter[1]) & (df["atemp"] <= atempDelimiter[2]), "atemp"] =  2
+            df.loc[df["atemp"] > atempDelimiter[2], "atemp"] =  3
 
-            df.loc[df["humidity"] <= humidityDelimiter[0]] =  0
-            df.loc[df["humidity"] > humidityDelimiter[0] & df["humidity"] <= humidityDelimiter[1]] =  1
-            df.loc[df["humidity"] > humidityDelimiter[1] & df["humidity"] <= humidityDelimiter[2]] =  2
-            df.loc[df["humidity"] > humidityDelimiter[2]] =  3
+            df.loc[df["humidity"] <= humidityDelimiter[0], "humidity"] =  0
+            df.loc[(df["humidity"] > humidityDelimiter[0]) & (df["humidity"] <= humidityDelimiter[1]), "humidity"] =  1
+            df.loc[(df["humidity"] > humidityDelimiter[1]) & (df["humidity"] <= humidityDelimiter[2]), "humidity"] =  2
+            df.loc[df["humidity"] > humidityDelimiter[2], "humidity"] =  3
 
-            df.loc[df["windspeed"] <= windspeedDelimiter[0]] =  0
-            df.loc[df["windspeed"] > windspeedDelimiter[0] & df["windspeed"] <= windspeedDelimiter[1]] =  1
-            df.loc[df["windspeed"] > windspeedDelimiter[1] & df["windspeed"] <= windspeedDelimiter[2]] =  2
-            df.loc[df["windspeed"] > windspeedDelimiter[2]] =  3
+            df.loc[df["windspeed"] <= windspeedDelimiter[0], "windspeed"] =  0
+            df.loc[(df["windspeed"] > windspeedDelimiter[0]) & (df["windspeed"] <= windspeedDelimiter[1]), "windspeed"] =  1
+            df.loc[(df["windspeed"] > windspeedDelimiter[1]) & (df["windspeed"] <= windspeedDelimiter[2]), "windspeed"] =  2
+            df.loc[df["windspeed"] > windspeedDelimiter[2], "windspeed"] =  3
             
-            df.loc[df["count"] <= countDelimiter[0]] =  0
-            df.loc[df["count"] > countDelimiter[0] & df["count"] <= countDelimiter[1]] =  1
-            df.loc[df["count"] > countDelimiter[1] & df["count"] <= countDelimiter[2]] =  2
-            df.loc[df["count"] > countDelimiter[2]] =  3
+            df.loc[df["count"] <= countDelimiter[0], "count"] =  0
+            df.loc[(df["count"] > countDelimiter[0]) & (df["count"] <= countDelimiter[1]), "count"] =  1
+            df.loc[(df["count"] > countDelimiter[1]) & (df["count"] <= countDelimiter[2]), "count"] =  2
+            df.loc[df["count"] > countDelimiter[2], "count"] =  3
             
         return df
             
