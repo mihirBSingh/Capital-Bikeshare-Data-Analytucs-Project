@@ -3,6 +3,7 @@
 
 #imports
 import dataProcessing
+import numpy as np
 from sklearn import tree 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
@@ -25,6 +26,27 @@ class Models:
         # clean data for testing file
         self.dfTest = self.dataProcessor.importData(testData)
         self.dfTest = self.dataProcessor.cleanData(self.dfTest, 1, False)
+        
+    def formatData(self):
+        # separate training dataframe into target and features lists for training
+        targetTrain = self.dfTrain["count"]    
+        featuresTrain = self.dfTrain.drop("count", axis=1)
+        featuresTrain= featuresTrain.drop("datetime", axis=1)
+        featuresTrain= featuresTrain.drop("casual", axis=1)
+        featuresTrain= featuresTrain.drop("registered", axis=1)
+        
+        # separate testing dataframe into target and features lists for testing
+        targetTest = self.dfTest["count"]
+        featuresTest = self.dfTest.drop("count", axis=1)
+        featuresTest = featuresTest.drop("datetime", axis=1)
+        
+        listOfData = []
+        listOfData.append(targetTrain)
+        listOfData.append(featuresTrain)
+        listOfData.append(targetTest)
+        listOfData.append(featuresTest)
+
+        return listOfData
         
         
     def decisionTree(self):
@@ -63,23 +85,35 @@ class Models:
     def naiveBayes(self):
         # separate training dataframe into target and features lists for training
         targetTrain = self.dfTrain["count"]
-        featuresTrain = self.dfTrain.drop("count", axis=1)
         
+        featuresTrain = self.dfTrain.drop("count", axis=1)
+        featuresTrain= featuresTrain.drop("datetime", axis=1)
+        featuresTrain= featuresTrain.drop("casual", axis=1)
+        featuresTrain= featuresTrain.drop("registered", axis=1)
+
         # create and train naive bayes classifier
         classifierNB = GaussianNB()
-        classifierNB = classifierNB.fit(targetTrain, featuresTrain)
+        classifierNB = classifierNB.fit(featuresTrain, targetTrain)
         
         # separate testing dataframe into target and features lists for testing
-        targetTest = self.dfTest["cnt"]
-        featuresTest = self.dfTest.drop("cnt", axis=1)
+        targetTest = self.dfTest["count"]
         
+        featuresTest = self.dfTest.drop("count", axis=1)
+        featuresTest = featuresTest.drop("datetime", axis=1)
+        
+        # printing for debugging
+        print(featuresTrain)
+        print(featuresTest)
+        print(targetTrain)
+
         # predict
         prediction = classifierNB.predict(featuresTest)
-        
         return prediction
     
 model = Models("train.csv","test.csv")    
-print("model", model.naiveBayes)
+print("model ")
+myarray = model.naiveBayes()
+print(myarray[1000:1500])
         
 
         
