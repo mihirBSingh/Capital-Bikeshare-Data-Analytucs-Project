@@ -3,6 +3,7 @@
 
 # imported modules
 import dataProcessing
+import pandas as pd
 import numpy as np
 import graphviz
 import calplot
@@ -27,13 +28,14 @@ class Models:
         # clean data for training file
         self.dfTrain = self.dataProcessor.importData(self.trainData)
         self.dataProcessor.fileInfoForTree(self.dfTrain)
-        self.dfTrain = self.dataProcessor.cleanData(self.dfTrain, 1, True)
-        
+        self.dfTrain = self.dataProcessor.cleanData(self.dfTrain)
+
         # clean data for testing file
         self.dfTest = self.dataProcessor.importData(testData)
-        self.dfTest = self.dataProcessor.cleanData(self.dfTest, 1, False)
+        self.dfTest = self.dataProcessor.cleanData(self.dfTest)
+
         
-    def formatData(self):
+    def formatData(self):            
         # separate training dataframe into target and features lists for training
         targetTrain = self.dfTrain["count"]    
         featuresTrain = self.dfTrain.drop("count", axis=1)
@@ -90,6 +92,11 @@ class Models:
         
         # predict
         prediction = classifierRF.predict(featuresTest)
+        
+        # get decision path
+        print("decision path")
+        print(classifierRF.decision_path(featuresTest))
+        
         return prediction
         
     def naiveBayes(self):
@@ -103,9 +110,14 @@ class Models:
         # create and train naive bayes classifier
         classifierNB = GaussianNB()
         classifierNB = classifierNB.fit(featuresTrain, targetTrain)
-
+        
         # predict
         prediction = classifierNB.predict(featuresTest)
+        
+        # get probabilities
+        print("probs")
+        print(classifierNB.predict_proba(featuresTest))
+        
         return prediction
     
     def neuralNet(self):
@@ -124,7 +136,18 @@ class Models:
         prediction = classifierNN.predict(featuresTest)
         return prediction
 
-    
+    def makeYearPlot(self, prediction):  
+        # grab datetimes of test data      
+        self.dfTest['datetime'] = pd.to_datetime(self.dfTest["datetime"], format='%Y-%m-%d %H:%M:%S')
+        time = self.dfTest['datetime']
+        
+        # create dataframe (really two-column series) for plot
+        values = pd.Series(prediction, index = time)
+
+        # plot
+        calplot.calplot(values)
+        plt.show()
+            
     def runModels():
         print("Choose which model you want to run")
 
@@ -133,12 +156,11 @@ model = Models("train.csv","test.csv")
 print("model ")
 # myarray = model.randomForest() # Random Forest
 # myarray = model.decisionTree() # Decision Tree
-myarray = model.naiveBayes()   # Naive Bayes
-print(len(myarray))
-# myarray = model.neuralNet() # Neural Net
+# myarray = model.naiveBayes()     # Naive Bayes
+# myarray = model.neuralNet()    # Neural Net
 
-# make year plot of business
-
+# make year plot of busy-ness
+model.makeYearPlot(myarray)
 
 
         
