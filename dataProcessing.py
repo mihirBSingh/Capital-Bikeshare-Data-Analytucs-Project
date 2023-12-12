@@ -15,7 +15,8 @@ class dataProcessing:
         df = pd.read_csv(fileInput)
         return df       
     
-    def fileInfoForTree(self, df):
+    # collects delimiters used for classification
+    def fileInfo(self, df):
         # collect nondiscretized data (temp, atemp, humidity, windspeed)
         tempVals = np.sort(df["temp"])
         atempVals = np.sort(df["atemp"])
@@ -54,9 +55,8 @@ class dataProcessing:
     # cleans data by creating a list object where each day has characteristics associated with it
     # also takes input for how we clean data --> needs to be different if doing binary tree or something else
     def cleanData(self, df):
-        listedData = df.values.tolist()        
             
-        # will throw error if we haven't trained --> always train model first
+        # always train model first
         tempDelimiter = self.treeDelimiters[0]
         atempDelimiter = self.treeDelimiters[1]  
         humidityDelimiter = self.treeDelimiters[2]
